@@ -11,9 +11,17 @@ node web01 {
 }
 node /^app0[0-9]/ {
     include pckgsextra
+    include pckgsextraCompile
+    include appsrv
+}
+class pckgsextraCompile {
+    #'openvpn',
+    package { [ 'git', 'ant','java-1.7.0-openjdk-devel', 'java-1.7.0-openjdk'] :
+        ensure  => present,
+    }
 }
 class pckgsextra{
-    package { ['git','ant','openvpn' , 'tar', 'telnet', 'java-1.7.0-openjdk-devel', 'java-1.7.0-openjdk', 'nano'] :
+    package { ['tar', 'telnet', 'nano'] :
         ensure  => present,
     }
     file { '/etc/hosts':
@@ -22,8 +30,11 @@ class pckgsextra{
         group => root,
         mode  => 644,
         content => "
-        192.168.100.14 base.local.com
+        192.168.100.14 dbase.local.com
         192.168.100.13 cache.local.com
+        192.168.100.12 app02.local.com
+        192.168.100.11 app01.local.com
+        192.168.100.10 www.proyecto.local.com
         ",
     }
     file { '/etc/environment':
@@ -40,9 +51,7 @@ class pckgsextra{
 class networking {
 
 }
-class websrv {
-    class { 'nginx': sendfile => off } 
-
+class usuariosRequeridos {
     user { "nginx":
         ensure     => present,
         gid        => "nginx",
@@ -66,13 +75,25 @@ class websrv {
         ensure     => present,
     }
 }
+class websrv {
+    class { 'nginx': sendfile => off } #moved to hiera.yaml
+    #Servidores de aplicacion
+    nginx::resource::upstream { 'puppet_rack_app':
+          members => [
+            '127.0.0.1:80'
+          ]
+    }
+    include usuariosRequeridos
+}
 #############================#############
+
 class appsrv {
+    
     #require yum::repo::remi
     require yum::repo::epel
     require yum::repo::remi_php56
     # For the user to exist
-    require websrv
+    include usuariosRequeridos
     package { 'libtidy':
         ensure  => present,
     }
@@ -88,7 +109,7 @@ class appsrv {
         log_dir_mode => '0775',
     }
     php::fpm::conf { 'www':
-        listen  => '127.0.0.1:9001',
+        listen  => '9001',
         user    => 'nginx',
     }
     php::module { [ 'pecl-apcu',
@@ -130,17 +151,18 @@ class appsrv {
     }
 }
 #############================#############
+
 class proyecto {
-    require websrv    
+    require websrv
+    
     nginx::resource::vhost { 'www.proyecto.local.com':
-        www_root => '/www/www.proyecto.local.com/public',
-        ssl => true,
-        #location        => '/',
-        ssl_cert             => '/vagrant/puppet/certs/server.crt',
-        ssl_key              => '/vagrant/puppet/certs/server.key',
-        index_files           => [ 'index.php' ],
-        use_default_location => true,
-        location_cfg_append => { 
+        www_root                => '/www/www.proyecto.local.com/public',
+        ssl                     => true,
+        ssl_cert                => '/vagrant/puppet/certs/server.crt',
+        ssl_key                 => '/vagrant/puppet/certs/server.key',
+        index_files             => [ 'index.php' ],
+        use_default_location    => true,
+        location_cfg_append     => { 
             try_files => '$uri $uri/ /index.php$is_args$args'
         }
     }
@@ -152,7 +174,7 @@ class proyecto {
         location        => '~ \.php$',
         index_files     => ['index.php'],
         proxy           => undef,
-        fastcgi         => "127.0.0.1:9001",
+        fastcgi         => "puppet_rack_app",
         fastcgi_script  => undef,
         location_cfg_append => { 
             fastcgi_connect_timeout => '5h',
