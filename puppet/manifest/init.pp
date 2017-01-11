@@ -110,7 +110,7 @@ class appsrv {
     }
     php::fpm::conf { 'www':
         listen                  => '9001',
-        listen_allowed_clients  => 'www.proyecto.local.com',
+        listen_allowed_clients  => '192.168.100.10',
         user                    => 'nginx',
     }
     php::module { [ 'pecl-apcu',
