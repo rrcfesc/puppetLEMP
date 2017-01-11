@@ -21,7 +21,7 @@ class pckgsextraCompile {
     }
 }
 class pckgsextra{
-    package { ['tar', 'telnet', 'nano'] :
+    package { ['tar', 'nmap', 'telnet', 'nano'] :
         ensure  => present,
     }
     file { '/etc/hosts':
@@ -80,7 +80,8 @@ class websrv {
     #Servidores de aplicacion
     nginx::resource::upstream { 'puppet_rack_app':
           members => [
-            '127.0.0.1:80'
+            'app02.local.com:9001',
+            'app01.local.com:9001'
           ]
     }
     include usuariosRequeridos
@@ -88,8 +89,7 @@ class websrv {
 #############================#############
 
 class appsrv {
-    
-    #require yum::repo::remi
+    require yum::repo::remi
     require yum::repo::epel
     require yum::repo::remi_php56
     # For the user to exist
@@ -109,8 +109,9 @@ class appsrv {
         log_dir_mode => '0775',
     }
     php::fpm::conf { 'www':
-        listen  => '9001',
-        user    => 'nginx',
+        listen                  => '9001',
+        listen_allowed_clients  => 'www.proyecto.local.com',
+        user                    => 'nginx',
     }
     php::module { [ 'pecl-apcu',
         'pear',

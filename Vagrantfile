@@ -5,23 +5,25 @@ Vagrant.configure("2") do |config|
         web_config.vm.network "private_network", ip:"192.168.100.11"
         web_config.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "256"]
-            vb.customize ["modifyvm", :id, "--cpuexecutioncap", "8"]
+            vb.customize ["modifyvm", :id, "--cpuexecutioncap", "11"]
         end
+        web_config.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
     end
-    #config.vm.define :app02 do |web_config|
-    #    web_config.vm.host_name = "app02"
-    #    web_config.vm.network "private_network", ip:"192.168.100.12"
-    #    web_config.vm.provider :virtualbox do |vb|
-    #        vb.customize ["modifyvm", :id, "--memory", "256"]
-    #        vb.customize ["modifyvm", :id, "--cpuexecutioncap", "8"]
-    #    end
-    #end
+    config.vm.define :app02 do |web_config|
+        web_config.vm.host_name = "app02"
+        web_config.vm.network "private_network", ip:"192.168.100.12"
+        web_config.vm.provider :virtualbox do |vb|
+            vb.customize ["modifyvm", :id, "--memory", "256"]
+            vb.customize ["modifyvm", :id, "--cpuexecutioncap", "11"]
+        end
+        web_config.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
+    end
     config.vm.define :web01 do |web_config|
         web_config.vm.host_name = "web01"
         web_config.vm.network "private_network", ip:"192.168.100.10"
         web_config.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "256"]
-            vb.customize ["modifyvm", :id, "--cpuexecutioncap", "10"]
+            vb.customize ["modifyvm", :id, "--cpuexecutioncap", "11"]
         end
         web_config.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
     end
