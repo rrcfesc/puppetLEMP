@@ -46,10 +46,10 @@ Vagrant.configure("2") do |config|
     config.vm.provision :shell do |shell|
         shell.path = "vagrant/bootstrap.sh"
     end
-    #config.vm.provision "puppet", run: "always" do |puppet|
-    #    puppet.manifests_path = "puppet/manifest"
-    #    puppet.hiera_config_path = "puppet/hiera.yaml"
-    #    puppet.manifest_file = "init.pp"
-    #    puppet.options = "--verbose"
-    #end
+    config.vm.provision "puppet", run: "always" do |puppet|
+        puppet.manifests_path = "puppet/manifest"
+        puppet.hiera_config_path = "puppet/hiera.yaml"
+        puppet.manifest_file = "init.pp"
+        puppet.options = "--verbose"
+    end
 end
