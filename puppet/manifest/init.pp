@@ -9,6 +9,9 @@ node web01 {
     include pckgsextra
     include proyecto
 }
+node memcached01 {
+    include pckgmemcached
+}
 node /^app0[0-9]/ {
     include pckgsextra
     include pckgsextraCompile
@@ -47,6 +50,14 @@ class pckgsextra{
         LC_ALL=es_MX.utf-8",
     }
     
+}
+######*****Instalación de Memcached*****************#####################################
+class pckgmemcached {
+    class { 'memcached':
+        port      => '11211',
+        maxconn   => '8192',
+        cachesize => '2048', 
+    }
 }
 class networking {
 
@@ -136,6 +147,9 @@ class appsrv {
         error_reporting             => 'E_ALL & ~E_DEPRECATED',
         display_errors              => 'On',
         html_errors                 => 'On',
+        session_cookie_secure       => '1',
+        session_save_handler        => 'memcached',
+        session_save_path           => 'tcp://192.168.100.13:11211',
         notify  => Service['php-fpm'],
     }
     file { '/var/log/php-fpm/www-error.log':
