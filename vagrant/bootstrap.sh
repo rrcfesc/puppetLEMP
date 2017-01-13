@@ -32,7 +32,7 @@ sudo puppet module install example42-yum;
 sudo puppet module install puppetlabs-mysql;
 sudo puppet module install puppetlabs-nodejs;
 sudo puppet module install willdurand/composer;
-sudo puppet module install thias-memcached;
+sudo puppet module install saz-memcached --version 3.0.1;
 sudo puppet module install puppet/staging;
 sudo puppet module install puppet/archive;
 sudo puppet module install puppetlabs/firewall;
