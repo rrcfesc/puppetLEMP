@@ -17,7 +17,14 @@ node /^app0[0-9]/ {
     include pckgsextra
     include pckgsextraCompile
     include appsrv
+    include pckgcomposer
+    include xdebug
 }
+node dat01 {
+    include pckgsextra
+    include mysqlSrv
+}
+###########===============================================############
 class pckgsextraCompile {
     #'openvpn',
     package { [ 'git', 'ant','java-1.7.0-openjdk-devel', 'java-1.7.0-openjdk'] :
@@ -52,9 +59,56 @@ class pckgsextra{
     }
     
 }
+class mysqlSrv {
+    
+}
+class xdebug {
+
+    require appsrv
+    package { ['gcc', 'gcc-c++','autoconf','automake'] :
+        ensure  => present,
+    }->
+    exec { "install_xdebug":
+       path => "/usr/bin/",
+       command => "sudo pecl install xdebug",
+       creates => "/usr/lib64/php/modules/xdebug.so"
+    }->
+    file { "/etc/php.d/xdebug.ini":
+        ensure  => file,
+        notify  => Service['php-fpm'],
+        content => "[xdebug]
+            zend_extension=\"/usr/lib64/php/modules/xdebug.so\"
+            xdebug.remote_enable = 1
+            xdebug.remote_connect_back = 1
+            xdebug.collect_params   = 4
+            xdebug.collect_vars = on
+            xdebug.dump_globals = on
+            xdebug.dump.SERVER = REQUEST_URI
+            xdebug.show_local_vars = on
+            xdebug.cli_color = 1
+            #xdebug.force_error_reporting = E_ALL & ~E_DEPRECATED",
+    }
+}
 ######*****Instalación de Memcached*****************#####################################
 class pckgmemcached {
-    class { 'memcached': }
+    class { 'memcached':
+        port      => '11211',
+        maxconn   => '8192',
+        cachesize => '2048'
+    }
+}
+class pckgcomposer{
+    #asegura que este instalado el php antes de instalar composer
+    package { 'php':
+            ensure  => present,
+    }
+    class { '::composer':
+        require => Package['php'],
+        command_name => 'composer',
+        target_dir   => '/usr/local/bin',
+        auto_update => true
+    }
+
 }
 class networking {
 

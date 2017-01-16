@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
         app01.vm.network "private_network", ip:"192.168.100.11"
         app01.vm.provider :virtualbox do |vbapp01|
             vbapp01.customize ["modifyvm", :id, "--memory", "256"]
-            vbapp01.customize ["modifyvm", :id, "--cpuexecutioncap", "15"]
+            vbapp01.customize ["modifyvm", :id, "--cpuexecutioncap", "10"]
         end
         app01.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
         app01.vm.provision :shell do |shell|
@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
         app02.vm.network "private_network", ip:"192.168.100.12"
         app02.vm.provider :virtualbox do |vbapp02|
             vbapp02.customize ["modifyvm", :id, "--memory", "256"]
-            vbapp02.customize ["modifyvm", :id, "--cpuexecutioncap", "11"]
+            vbapp02.customize ["modifyvm", :id, "--cpuexecutioncap", "7"]
         end
         app02.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
         app02.vm.provision :shell do |shell|
@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
         web01.vm.network "private_network", ip:"192.168.100.10"
         web01.vm.provider :virtualbox do |vbweb01|
             vbweb01.customize ["modifyvm", :id, "--memory", "256"]
-            vbweb01.customize ["modifyvm", :id, "--cpuexecutioncap", "11"]
+            vbweb01.customize ["modifyvm", :id, "--cpuexecutioncap", "7"]
         end
         web01.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
         web01.vm.provision :shell do |shell|
@@ -68,9 +68,8 @@ Vagrant.configure("2") do |config|
         mem01.vm.network "private_network", ip:"192.168.100.13"
         mem01.vm.provider :virtualbox do |vbmem01|
             vbmem01.customize ["modifyvm", :id, "--memory", "256"]
-            vbmem01.customize ["modifyvm", :id, "--cpuexecutioncap", "11"]
+            vbmem01.customize ["modifyvm", :id, "--cpuexecutioncap", "10"]
         end
-        mem01.vm.synced_folder "../proyecto", "/www/www.proyecto.local.com", disabled: (not FileTest::directory?("../proyecto"))
         mem01.vm.provision :shell do |shell|
             shell.path = "vagrant/bootstrap.sh"
         end
@@ -81,12 +80,22 @@ Vagrant.configure("2") do |config|
             puppetmem01.options             = "--verbose"
         end
     end
-#    config.vm.define :mysql01 do |web_config|
-#        web_config.vm.host_name = "mysql01"
-#        web_config.vm.network "private_network", ip:"192.168.100.14"
-#        web_config.vm.provider :virtualbox do |vb|
-#            vb.customize ["modifyvm", :id, "--memory", "256"]
-#            vb.customize ["modifyvm", :id, "--cpuexecutioncap", "10"]
-#        end
-#    end
+    config.vm.define :dat01 do |dat01|
+        dat01.vm.host_name = "dat01"
+        dat01.vm.box = "puppetlabs/centos-6.6-64-nocm"
+        dat01.vm.network "private_network", ip:"192.168.100.14"
+        dat01.vm.provider :virtualbox do |vbdat01|
+            vbdat01.customize ["modifyvm", :id, "--memory", "256"]
+            vbdat01.customize ["modifyvm", :id, "--cpuexecutioncap", "10"]
+        end
+        dat01.vm.provision :shell do |shell|
+            shell.path = "vagrant/bootstrap.sh"
+        end
+        dat01.vm.provision "puppet", run: "always" do |puppetdat01|
+            puppetdat01.manifests_path      = "puppet/manifest"
+            puppetdat01.hiera_config_path   = "puppet/hiera.yaml"
+            puppetdat01.manifest_file       = "init.pp"
+            puppetdat01.options             = "--verbose"
+        end
+    end
 end
