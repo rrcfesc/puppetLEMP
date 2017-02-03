@@ -1,3 +1,7 @@
+if #puppet.version# < 4
+           options << "--manifestdir #{manifests_guest_path}"
+          end
+
 file { '/etc/hosts':
         ensure  => file,
         owner => root,
