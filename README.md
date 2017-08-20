@@ -18,11 +18,8 @@ C:\windows\system32\drivers\etc\hosts para windows )
 
 Es importante comentar que la resolucion de nombres, esta en cada uno de los servidores y responden a la siguiente manera:
 
-    192.168.100.14 dbase.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
-    192.168.100.13 cache.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
-    192.168.100.12 app02.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
     192.168.100.11 app01.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
-    192.168.100.10 www.proyecto.local.com
+    192.168.100.11 www.proyecto.local.com
 
 ## Modo de uso
 Una vez que tenemos la configuración correcta podemos manipular el servidor virtual desde la linea de comandos
